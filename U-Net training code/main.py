@@ -52,7 +52,6 @@ def create_segmentation_generator_train(img_path, msk_path, BATCH_SIZE):
     return zip(img_generator, msk_generator)
 
 
-# Remember not to perform any image augmentation in the test generator!
 def create_segmentation_generator_test(img_path, msk_path, BATCH_SIZE):
     data_gen_args = dict(rescale=1. / 255)
     datagen = ImageDataGenerator(**data_gen_args)
