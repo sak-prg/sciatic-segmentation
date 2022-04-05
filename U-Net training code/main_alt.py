@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D, concatenate, Conv2DTranspose, BatchNormalization, Dropout, Lambda
 import imageio
+import tensorflow as tf
 import glob
 
 ############################################################################################################
@@ -81,10 +82,8 @@ def simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS):
 
     outputs = Conv2D(1, (1, 1), activation='sigmoid')(c11)
 
-    model = Model(inputs=[inputs], outputs=[outputs])
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-    model.summary()
-
+    model = tf.keras.Model(inputs=[inputs], outputs=[outputs])
+    return model
 ########################################################################################################### 
    
 SIZE = 512
@@ -142,14 +141,16 @@ for i, image_name in enumerate(masks):
     def get_model():
         return simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS)
 
-    model = get_model()
+    model=get_model()
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.summary()
 
     # If starting with pre-trained weights.
     # model.load_weights('sciatic.hdf5')
     
     #CURRENT ERROR: AttributeError: 'numpy.ndarray' object has no attribute '_assert_compile_was_called'
     
-    history = Model.fit(X_train, y_train,
+    history = model.fit(X_train, y_train,
                         batch_size=160,
                         verbose=1,
                         epochs=1,
