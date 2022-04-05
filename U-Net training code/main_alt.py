@@ -151,7 +151,7 @@ for i, image_name in enumerate(masks):
     #CURRENT ERROR: AttributeError: 'numpy.ndarray' object has no attribute '_assert_compile_was_called'
     
     history = model.fit(X_train, y_train,
-                        batch_size=160,
+                        batch_size=1,
                         verbose=1,
                         epochs=1,
                         validation_data=(X_test, y_test),
@@ -205,39 +205,39 @@ for i, image_name in enumerate(masks):
     # Predict on a few images
     #model = get_model()
     #model.load_weights('sciatic_50_plus_100_epochs.hdf5')  # Trained for 50 epochs and then additional 100
-    # model.load_weights('sciatic.hdf5')  #Trained for 50 epochs
+    model.load_weights('test.hdf5')  #Trained for 50 epochs
 
-    #test_img_number = random.randint(0, len(X_test))
-    #test_img = X_test[test_img_number]
-    #ground_truth = y_test[test_img_number]
-    #test_img_norm = test_img[:, :, 0][:, :, None]
-    #test_img_input = np.expand_dims(test_img_norm, 0)
-    #prediction = (model.predict(test_img_input)[0, :, :, 0] > 0.2).astype(np.uint8)
+    test_img_number = random.randint(0, len(X_test))
+    test_img = X_test[test_img_number]
+    ground_truth = y_test[test_img_number]
+    test_img_norm = test_img[:, :, 0][:, :, None]
+    test_img_input = np.expand_dims(test_img_norm, 0)
+    prediction = (model.predict(test_img_input)[0, :, :, 0] > 0.2).astype(np.uint8)
 
-    #test_img_other = cv2.imread('data/test_images/02-1_256.png', 0)
-    # test_img_other = cv2.imread('data/test_images/img8.png', 0)
-    #test_img_other_norm = np.expand_dims(normalize(np.array(test_img_other), axis=1), 2)
-    #test_img_other_norm = test_img_other_norm[:, :, 0][:, :, None]
-    #test_img_other_input = np.expand_dims(test_img_other_norm, 0)
+    test_img_other = cv2.imread('data/test_images/02-1_256.png', 0)
+    test_img_other = cv2.imread('data/test_images/img8.png', 0)
+    test_img_other_norm = np.expand_dims(normalize(np.array(test_img_other), axis=1), 2)
+    test_img_other_norm = test_img_other_norm[:, :, 0][:, :, None]
+    test_img_other_input = np.expand_dims(test_img_other_norm, 0)
 
     # Predict and threshold for values above 0.5 probability
     # Change the probability threshold to low value (e.g. 0.05) for watershed demo.
-    #prediction_other = (model.predict(test_img_other_input)[0, :, :, 0] > 0.2).astype(np.uint8)
+    prediction_other = (model.predict(test_img_other_input)[0, :, :, 0] > 0.2).astype(np.uint8)
 
-    #plt.figure(figsize=(16, 8))
-    #plt.subplot(231)
-    #plt.title('Testing Image')
-    #plt.imshow(test_img[:, :, 0], cmap='gray')
-    #plt.subplot(232)
-    #plt.title('Testing Label')
-    #plt.imshow(ground_truth[:, :, 0], cmap='gray')
-    #plt.subplot(233)
-    #plt.title('Prediction on test image')
-    #plt.imshow(prediction, cmap='gray')
-    #plt.subplot(234)
-    #plt.title('External Image')
-    #plt.imshow(test_img_other, cmap='gray')
-    #plt.subplot(235)
-    #plt.title('Prediction of external Image')
-    #plt.imshow(prediction_other, cmap='gray')
-    #plt.show()
+    plt.figure(figsize=(16, 8))
+    plt.subplot(231)
+    plt.title('Testing Image')
+    plt.imshow(test_img[:, :, 0], cmap='gray')
+    plt.subplot(232)
+    plt.title('Testing Label')
+    plt.imshow(ground_truth[:, :, 0], cmap='gray')
+    plt.subplot(233)
+    plt.title('Prediction on test image')
+    plt.imshow(prediction, cmap='gray')
+    plt.subplot(234)
+    plt.title('External Image')
+    plt.imshow(test_img_other, cmap='gray')
+    plt.subplot(235)
+    plt.title('Prediction of external Image')
+    plt.imshow(prediction_other, cmap='gray')
+    plt.show()
