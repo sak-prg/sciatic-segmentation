@@ -12,6 +12,13 @@ import tensorflow as tf
 import glob
 
 ############################################################################################################
+def dice_loss(y_true, y_pred):
+  y_true = tf.cast(y_true, tf.float32)
+  y_pred = tf.math.sigmoid(y_pred)
+  numerator = 2 * tf.reduce_sum(y_true * y_pred)
+  denominator = tf.reduce_sum(y_true + y_pred)
+
+  return 1 - numerator / denominator
 
 def simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS):
     # Build the model
@@ -102,7 +109,7 @@ for i, image_name in enumerate(images):
         image = image.resize((512,512))
         image_dataset.append(np.array(image))
         print(image)
-
+        
 masks = os.listdir(mask_directory)
 for i, image_name in enumerate(masks):
     if (image_name.split('.')[1] == 'png'):
@@ -112,10 +119,12 @@ for i, image_name in enumerate(masks):
         mask_dataset.append(np.array(image))
         print(image)
 
+
+    true_mask= np.asarray(mask_dataset)>0
     # Normalize images
     image_dataset = np.expand_dims(normalize(np.array(image_dataset), axis=1), 3)
     # D not normalize masks, just rescale to 0 to 1.
-    mask_dataset = np.expand_dims((np.array(mask_dataset)), 3) 
+    mask_dataset = np.expand_dims((true_mask), 3) 
 
     #Create random set of test images (10% of training dataset)
     from sklearn.model_selection import train_test_split
@@ -142,7 +151,7 @@ for i, image_name in enumerate(masks):
         return simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS)
 
     model=get_model()
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='adam', loss=dice_loss, metrics=['accuracy'])
     model.summary()
 
     # If starting with pre-trained weights.
@@ -153,11 +162,11 @@ for i, image_name in enumerate(masks):
     history = model.fit(X_train, y_train,
                         batch_size=1,
                         verbose=1,
-                        epochs=1,
+                        epochs=10,
                         validation_data=(X_test, y_test),
                         shuffle=False)
 
-    model.save('test.hdf5')
+    model.save('test2.hdf5')
 
     ############################################################
     # Evaluate the model
@@ -205,24 +214,24 @@ for i, image_name in enumerate(masks):
     # Predict on a few images
     #model = get_model()
     #model.load_weights('sciatic_50_plus_100_epochs.hdf5')  # Trained for 50 epochs and then additional 100
-    model.load_weights('test.hdf5')  #Trained for 50 epochs
+    model.load_weights('test2.hdf5')  #Trained for 50 epochs
 
     test_img_number = random.randint(0, len(X_test))
     test_img = X_test[test_img_number]
     ground_truth = y_test[test_img_number]
     test_img_norm = test_img[:, :, 0][:, :, None]
     test_img_input = np.expand_dims(test_img_norm, 0)
-    prediction = (model.predict(test_img_input)[0, :, :, 0] > 0.2).astype(np.uint8)
+    prediction = (model.predict(test_img_input)[0, :, :, 0] > 0.1).astype(np.uint8)
 
-    test_img_other = cv2.imread('data/test_images/02-1_256.png', 0)
-    test_img_other = cv2.imread('data/test_images/img8.png', 0)
+    test_img_other = cv2.imread('58.png', 0)
+    #test_img_other = cv2.imread('data/test_images/img8.png', 0)
     test_img_other_norm = np.expand_dims(normalize(np.array(test_img_other), axis=1), 2)
     test_img_other_norm = test_img_other_norm[:, :, 0][:, :, None]
     test_img_other_input = np.expand_dims(test_img_other_norm, 0)
 
     # Predict and threshold for values above 0.5 probability
     # Change the probability threshold to low value (e.g. 0.05) for watershed demo.
-    prediction_other = (model.predict(test_img_other_input)[0, :, :, 0] > 0.2).astype(np.uint8)
+    prediction_other = (model.predict(test_img_other_input)[0, :, :, 0] > 0.1).astype(np.uint8)
 
     plt.figure(figsize=(16, 8))
     plt.subplot(231)
