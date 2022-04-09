@@ -8,7 +8,9 @@ def tversky_loss(beta):
     return 1 - tf.reduce_sum(numerator) / tf.reduce_sum(denominator)
 
   return loss
-  
+########################################################################################################################
+sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+ 
 ########################################################################################################################  
   def loss(y_true, y_pred):
     def dice_loss(y_true, y_pred):
